@@ -3,8 +3,9 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
 
-from .models import User
+from .models import User, Categories, Listings, Bids, Comments
 
 
 def index(request):
@@ -61,3 +62,58 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
+
+@login_required
+def create_listing(request):
+    categories = Categories.objects.all()
+
+    def error_return(message, categories):
+        return render(request, "auctions/create-listing.html", {
+            "categories": categories,
+            "message": message
+        })
+
+    if request.method == "POST":
+        message = ""
+
+        category = request.POST["category"]
+        category_ins = Categories.objects.get(title=category)
+
+        title = request.POST["title"]
+        if not title:
+            message = "Please enter a title."
+            return error_return(message, categories)
+
+        description = request.POST["description"]
+        if not description:
+            message = "Please enter a description."
+            return error_return(message, categories)
+
+        starting_bid = request.POST["starting-bid"]
+        if not starting_bid:
+            message = "Please enter a starting bid."
+            return error_return(message, categories)
+
+        image_url = request.POST["image-url"]
+
+        listing = Listings(
+            title=title,
+            description=description, 
+            starting_bid=starting_bid,
+            image=image_url,
+            category=category_ins
+            )
+        listing.save()
+
+        #TODO redirect to make listing
+        
+        return render(request, "auctions/create-listing.html", {
+            "categories": categories,
+            "message": message
+        })
+        
+        
+    else:
+        return render(request, "auctions/create-listing.html", {
+            "categories": categories
+        })
