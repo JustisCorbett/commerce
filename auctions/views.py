@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 
-from .models import User, Categories, Listings, Bids, Comments
+from .models import User, Category, Listing, Bid, Comment
 
 
 def index(request):
@@ -65,7 +65,7 @@ def register(request):
 
 @login_required
 def create_listing(request):
-    categories = Categories.objects.all()
+    categories = Category.objects.all()
 
     def error_return(message, categories):
         return render(request, "auctions/create-listing.html", {
@@ -77,7 +77,7 @@ def create_listing(request):
         message = ""
 
         category = request.POST["category"]
-        category_ins = Categories.objects.get(title=category)
+        category_ins = Category.objects.get(title=category)
 
         title = request.POST["title"]
         if not title:
@@ -96,7 +96,7 @@ def create_listing(request):
 
         image_url = request.POST["image-url"]
 
-        listing = Listings(
+        listing = Listing(
             title=title,
             description=description, 
             starting_bid=starting_bid,
@@ -106,7 +106,7 @@ def create_listing(request):
         listing.save()
 
         #TODO redirect to make listing
-        
+
         return render(request, "auctions/create-listing.html", {
             "categories": categories,
             "message": message

@@ -5,22 +5,23 @@ from django.db import models
 class User(AbstractUser):
     pass
 
-class Categories(models.Model):
+class Category(models.Model):
     title = models.CharField(max_length=64)
 
-class Listings(models.Model):
+class Listing(models.Model):
     title = models.CharField(max_length=64)
     description = models.TextField()
     starting_bid = models.IntegerField()
     image = models.URLField()
     category = models.ForeignKey(
-        Categories,
+        Category,
         on_delete=models.CASCADE,
     )
+    is_active = models.BooleanField(default=True)
 
-class Bids(models.Model):
+class Bid(models.Model):
     listing = models.ForeignKey(
-        Listings,
+        Listing,
         on_delete=models.CASCADE
     )
     user = models.ForeignKey(
@@ -29,9 +30,9 @@ class Bids(models.Model):
     )
     amount = models.IntegerField()
 
-class Comments(models.Model):
+class Comment(models.Model):
     listing = models.ForeignKey(
-        Listings,
+        Listing,
         on_delete=models.CASCADE
     )
     user = models.ForeignKey(
@@ -40,3 +41,12 @@ class Comments(models.Model):
     )
     text = models.TextField()
 
+class Watch(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+    listing = models.ForeignKey(
+        Listing,
+        on_delete=models.CASCADE
+    )
