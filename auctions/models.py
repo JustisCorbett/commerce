@@ -8,6 +8,9 @@ class User(AbstractUser):
 class Category(models.Model):
     title = models.CharField(max_length=64)
 
+    def __str__(self):
+        return f"{self.title}"
+
 class Listing(models.Model):
     title = models.CharField(max_length=64)
     description = models.TextField()
@@ -18,6 +21,10 @@ class Listing(models.Model):
         on_delete=models.CASCADE,
     )
     is_active = models.BooleanField(default=True)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
 
 class Bid(models.Model):
     listing = models.ForeignKey(
