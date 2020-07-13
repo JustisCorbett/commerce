@@ -3,5 +3,23 @@
 {% block body %}
     <h2>Active Listings</h2>
 
-    TODO
+    <div class="list-wrapper">
+        {% for listing in listings %}
+        <a href="{% url for "" %}"
+            <div class="listing-wrapper">
+                <div class="img-wrapper">
+                    <img src="{{ listing.image }}">
+                </div>
+                <div class="listing-info">
+                    <h4>{{ listing.title }}</h4>
+                    <p>{{ listing.description }}</p>
+                    {% if listing.bid__max %}
+                        <h6>Current Price: {{ listing.bid__max }}</h6>
+                    {% else %}
+                        <h6>Current Price: {{ listing.starting_bid }}</h6>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 {% endblock %}

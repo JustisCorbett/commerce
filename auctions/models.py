@@ -12,7 +12,7 @@ class Listing(models.Model):
     title = models.CharField(max_length=64)
     description = models.TextField()
     starting_bid = models.IntegerField()
-    image = models.URLField()
+    image = models.URLField(blank=True)
     category = models.ForeignKey(
         Category,
         on_delete=models.CASCADE,

@@ -4,12 +4,20 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q, Max
 
-from .models import User, Category, Listing, Bid, Comment
+from .models import User, Category, Listing, Bid, Comment, Watch
+from .forms import ListingForm, BidForm, CommentForm
 
 
 def index(request):
-    return render(request, "auctions/index.html")
+    #listings = Listing.objects.filter(is_active=True).annotate(models.Max(Bid))
+    listings = Listing.objects.annotate(
+        max_bid=Max('bid', filter=Q(is_active=True))
+    )
+    return render(request, "auctions/index.html", {
+        "listings": listings
+    })
 
 
 def login_view(request):
@@ -66,6 +74,7 @@ def register(request):
 @login_required
 def create_listing(request):
     categories = Category.objects.all()
+
 
     def error_return(message, categories):
         return render(request, "auctions/create-listing.html", {
