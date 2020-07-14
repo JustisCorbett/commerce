@@ -71,26 +71,31 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
-@login_required
-def create_listing(request):
-    form = ListingForm
 
-    def error_return(message, categories):
-        return render(request, "auctions/create-listing.html", {
-            "form": form,
-            "message": message
-        })
+@login_required(login_url='login')
+def create_listing(request):
+    form = ListingForm()
 
     if request.method == "POST":
+        #form = ListingForm(request.POST)
+        if request.user.is_authenticated:
+            form = ListingForm(request.POST)
+            #form.user = request.user
+            if form.is_valid():
+                instance = form.save(commit=False)
+                instance.user = request.user
+                instance.save()
+                title = request.POST["title"]
+                return HttpResponseRedirect(reverse("listing", kwargs={"title":title}))
         
+    return render(request, "auctions/create-listing.html", {
+        "form": form,
+    })
 
-        return render(request, "auctions/create-listing.html", {
-            "form": form,
-            "message": message
-        })
-        
-        
-    else:
-        return render(request, "auctions/create-listing.html", {
-            "form": form,
-        })
+
+def listing(request, title):
+    listing = Listings.objects.filter(title=title)
+
+    return render(request, "auctions/listing.html", {
+        "listing": listing,
+    })

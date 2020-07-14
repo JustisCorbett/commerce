@@ -2,6 +2,7 @@ from django import forms
 
 from .models import Category, Listing, Bid, Comment
 
+
 class ListingForm(forms.ModelForm):
     class Meta:
         model = Listing
@@ -20,11 +21,27 @@ class ListingForm(forms.ModelForm):
             "starting_bid": forms.NumberInput(attrs={"class": "form-control"}),
             "image": forms.URLInput(attrs={"class": "form-control"}),
         }
+        error_messages = {
+            "title": {
+                "required": "Please enter a title.",
+            },
+            "category": {
+                "required": "Please select a category.",
+            },
+            "description": {
+                "required": "Please enter a description.",
+            },
+            "starting_bid": {
+                "required": "Please enter a starting bid(to the nearest dollar).",
+            },
+        }
+
 
 class BidForm(forms.ModelForm):
     class Meta:
         model = Bid
         fields = ["amount"]
+
 
 class CommentForm(forms.ModelForm):
     class Meta:
