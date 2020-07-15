@@ -12,7 +12,7 @@ from .forms import ListingForm, BidForm, CommentForm
 
 def index(request):
     listings = Listing.objects.annotate(
-        max_bid=Max('bid', filter=Q(is_active=True))
+        max_bid=Max('bids', filter=Q(is_active=True))
     )
     return render(request, "auctions/index.html", {
         "listings": listings
@@ -106,8 +106,10 @@ def categories(request):
 
 def category(request, name):
     category = Category.objects.get(title=name)
-    listings = category.listings.all()
+    listings = category.listings.annotate(
+        max_bid=Max('bids', filter=Q(is_active=True))
+    )
     return render(request, "auctions/category.html", {
-        "category": category
+        "category": category,
         "listings": listings
     })
