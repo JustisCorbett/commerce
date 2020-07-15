@@ -11,7 +11,6 @@ from .forms import ListingForm, BidForm, CommentForm
 
 
 def index(request):
-    #listings = Listing.objects.filter(is_active=True).annotate(models.Max(Bid))
     listings = Listing.objects.annotate(
         max_bid=Max('bid', filter=Q(is_active=True))
     )
@@ -75,7 +74,6 @@ def register(request):
 @login_required(login_url='login')
 def create_listing(request):
     form = ListingForm()
-
     if request.method == "POST":
         #form = ListingForm(request.POST)
         if request.user.is_authenticated:
@@ -87,15 +85,29 @@ def create_listing(request):
                 instance.save()
                 title = request.POST["title"]
                 return HttpResponseRedirect(reverse("listing", kwargs={"title":title}))
-        
     return render(request, "auctions/create-listing.html", {
-        "form": form,
+        "form": form
     })
 
 
 def listing(request, title):
-    listing = Listings.objects.filter(title=title)
-
+    listing = Listing.objects.select_related('user').get(title=title)
     return render(request, "auctions/listing.html", {
-        "listing": listing,
+        "listing": listing
+    })
+
+
+def categories(request):
+    categories = Category.objects.all()
+    return render(request, "auctions/categories.html", {
+        "categories": categories
+    })
+
+
+def category(request, name):
+    category = Category.objects.get(title=name)
+    listings = category.listings.all()
+    return render(request, "auctions/category.html", {
+        "category": category
+        "listings": listings
     })

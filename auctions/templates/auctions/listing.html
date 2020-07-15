@@ -1,0 +1,23 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Listing</h2>
+
+    <div class="list-wrapper">
+        <div class="listing-wrapper">
+            <div class="img-wrapper">
+                <img src="{{ listing.image }}">
+            </div>
+            <div class="listing-info">
+                <h3>{{ listing.title }}</h3>
+                <h5>Posted by: {{ listing.user }} at {{ listing.date_posted }}</h5>
+                <p>{{ listing.description }}</p>
+                {% if listing.bid__max %}
+                    <h6>Current Price: {{ listing.bid__max }}</h6>
+                {% else %}
+                    <h6>Current Price: {{ listing.starting_bid }}</h6>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

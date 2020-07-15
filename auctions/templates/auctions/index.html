@@ -5,7 +5,7 @@
 
     <div class="list-wrapper">
         {% for listing in listings %}
-        <a href="{% url for "" %}"
+        <a href="{% url "listing" title=listing.title %}">
             <div class="listing-wrapper">
                 <div class="img-wrapper">
                     <img src="{{ listing.image }}">
@@ -20,6 +20,7 @@
                     {% endif %}
                 </div>
             </div>
+        </a>
         {% endfor %}
     </div>
 {% endblock %}
