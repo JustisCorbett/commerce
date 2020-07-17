@@ -113,3 +113,23 @@ def category(request, name):
         "category": category,
         "listings": listings
     })
+
+
+def watchlist(request):
+    user_id = request.user
+    listings = Watch.objects.select_related('listing').filter(user=user_id)
+    return render(request, "auctions/watchlist.html", {
+        "listings": listings
+    })
+
+
+@login_required(login_url='login')
+def watchlist_add(request, title):
+    watch = Watch()
+    listing = Listing.objects.get(title=title)
+    user = request.user
+
+    watch.user = user
+    watch.listing = listing.id
+    watch.save()
+    return HttpResponseRedirect(reverse("watchlist"))
