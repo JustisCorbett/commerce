@@ -66,3 +66,5 @@ class Watch(models.Model):
         on_delete=models.CASCADE,
         related_name="watched"
     )
+    class Meta:
+        unique_together = (('user','listing'),)

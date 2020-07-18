@@ -92,9 +92,16 @@ def create_listing(request):
 
 def listing(request, title):
     listing = Listing.objects.select_related('user').get(title=title)
-    return render(request, "auctions/listing.html", {
-        "listing": listing
-    })
+    if request.user.is_authenticated:
+        watched = Watch.objects.filter(listing=listing.id, user=request.user)
+        if watched.exists():
+            is_watched = True
+        else:
+            is_watched = False
+        return render(request, "auctions/listing.html", {
+            "listing": listing,
+            "watched": is_watched
+        })
 
 
 def categories(request):
@@ -124,12 +131,14 @@ def watchlist(request):
 
 
 @login_required(login_url='login')
-def watchlist_add(request, title):
-    watch = Watch()
-    listing = Listing.objects.get(title=title)
-    user = request.user
+def watchlist_add(request):
+    if request.method == "POST":
+        title = request.POST["title"]
+        listing = Listing.objects.get(title=title)
+        user = request.user
 
-    watch.user = user
-    watch.listing = listing.id
-    watch.save()
-    return HttpResponseRedirect(reverse("watchlist"))
+        obj,created = Watch.objects.get_or_create(
+            user=user,
+            listing=listing.id
+            )
+        return HttpResponseRedirect(reverse("watchlist"))

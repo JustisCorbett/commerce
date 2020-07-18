@@ -18,6 +18,16 @@
                     <h6>Current Price: {{ listing.starting_bid }}</h6>
                 {% endif %}
             </div>
+            {% if watched %}
+                <div class="btn btn-secondary">Watched</div>
+            {% else %}
+                <form action="{}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="title" value="{{ listing.title }}">
+                    <input class="btn btn-success" type="submit" value="Add to Watchlist">
+                </form>
+            {% endif %}
+
         </div>
     </div>
 {% endblock %}
