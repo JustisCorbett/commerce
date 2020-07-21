@@ -7,12 +7,12 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Max
 
 from .models import User, Category, Listing, Bid, Comment, Watch
-from .forms import ListingForm, BidForm, CommentForm
+from .forms import ListingForm, CommentForm
 
 
 def index(request):
     listings = Listing.objects.annotate(
-        max_bid=Max('bids', filter=Q(is_active=True))
+        max_bid=Max("bids", filter=Q(is_active=True))
     )
     return render(request, "auctions/index.html", {
         "listings": listings
@@ -91,13 +91,19 @@ def create_listing(request):
 
 
 def listing(request, title):
-    listing = Listing.objects.select_related('user').get(title=title)
+    listing = Listing.objects.select_related("user").get(title=title)
+    bids = Bid.objects.prefetch_related(
+        Prefetch('', queryset=Book.objects.filter(price__range=(250, 300)))
+    )
+    # check if user is watching
     if request.user.is_authenticated:
-        watched = Watch.objects.filter(listing=listing.id, user=request.user)
-        if watched.exists():
-            is_watched = True
-        else:
+        try:
+            watched = Watch.objects.get(listing=listing, user=request.user)
+        except Watch.DoesNotExist:
             is_watched = False
+        else:
+            is_watched = True
+
         return render(request, "auctions/listing.html", {
             "listing": listing,
             "watched": is_watched
@@ -123,8 +129,8 @@ def category(request, name):
 
 
 def watchlist(request):
-    user_id = request.user
-    listings = Watch.objects.select_related('listing').filter(user=user_id)
+    user = request.user
+    listings = Watch.objects.select_related('listing').filter(user=user)
     return render(request, "auctions/watchlist.html", {
         "listings": listings
     })
@@ -139,6 +145,37 @@ def watchlist_add(request):
 
         obj,created = Watch.objects.get_or_create(
             user=user,
-            listing=listing.id
+            listing=listing
             )
         return HttpResponseRedirect(reverse("watchlist"))
+    else:
+        HttpResponseRedirect(reverse("watchlist"))
+
+
+@login_required(login_url='login')
+def watchlist_delete(request):
+    if request.method == "POST":
+        title = request.POST["title"]
+        listing = Listing.objects.get(title=title)
+        user = request.user
+
+        deleted = Watch.objects.get(user=user,listing=listing).delete()
+        return HttpResponseRedirect(reverse("watchlist"))
+    else:
+        HttpResponseRedirect(reverse("watchlist"))
+
+
+@login_required(login_url='login')
+def bid(request):
+    if request.method == "POST":
+        bid = request.POST["bid"]
+        title = request.POST["title"]
+        listing = Listing.objects.get(title=title)
+        user = request.user
+
+        bid = Bid.objects.create(
+            amount=int(bid),
+            listing=listing,
+            user=user
+            )
+        

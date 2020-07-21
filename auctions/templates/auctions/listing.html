@@ -19,9 +19,13 @@
                 {% endif %}
             </div>
             {% if watched %}
-                <div class="btn btn-secondary">Watched</div>
+                <form action="{% url "watchlist_delete" %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="title" value="{{ listing.title }}">
+                <input class="btn btn-danger" type="submit" value="Remove from Watchlist">
+            </form>
             {% else %}
-                <form action="{}" method="post">
+                <form action="{% url "watchlist_add" %}" method="post">
                     {% csrf_token %}
                     <input type="hidden" name="title" value="{{ listing.title }}">
                     <input class="btn btn-success" type="submit" value="Add to Watchlist">
