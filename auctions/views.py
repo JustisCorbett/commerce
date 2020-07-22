@@ -4,16 +4,18 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q, Max
+from django.db.models import Q, Max, Prefetch
 
 from .models import User, Category, Listing, Bid, Comment, Watch
 from .forms import ListingForm, CommentForm
 
 
 def index(request):
-    listings = Listing.objects.annotate(
-        max_bid=Max("bids", filter=Q(is_active=True))
-    )
+    # Get active listings and their user, category, and bids ordered by amount
+    listings = Listing.objects.prefetch_related(
+        Prefetch("bids", queryset=Bid.objects.order_by("-amount").all())
+    ).select_related("user", "category").filter(is_active=True)
+    
     return render(request, "auctions/index.html", {
         "listings": listings
     })
@@ -91,10 +93,10 @@ def create_listing(request):
 
 
 def listing(request, title):
-    listing = Listing.objects.select_related("user").get(title=title)
-    bids = Bid.objects.prefetch_related(
-        Prefetch('', queryset=Book.objects.filter(price__range=(250, 300)))
-    )
+    # Get requested listing and it's user, category, and bids ordered by amount
+    listing = Listing.objects.prefetch_related(
+        Prefetch("bids", queryset=Bid.objects.order_by("-amount").all())
+    ).select_related("user", "category").get(title=title)
     # check if user is watching
     if request.user.is_authenticated:
         try:
@@ -106,6 +108,7 @@ def listing(request, title):
 
         return render(request, "auctions/listing.html", {
             "listing": listing,
+            "bid": bid,
             "watched": is_watched
         })
 
