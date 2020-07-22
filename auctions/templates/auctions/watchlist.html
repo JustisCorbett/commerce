@@ -11,8 +11,15 @@
                     <img src="{{ watched.listing.image }}">
                 </div>
                 <div class="listing-info">
-                    <h4>{{ watched.listing.title }}</h4>
+                    <h3>{{ watched.listing.title }}</h3>
+                    <h5>Category: {{ watched.listing.category }}</h5>
+                    <h5>Posted By {{ watched.listing.user }} at {{ watched.listing.date_posted }}</h5>
                     <p>{{ watched.listing.description }}</p>
+                    {% if watched.listing.bids.all %}
+                        <h6>Current Price: {{ watched.listing.bids.first.amount }}</h6>
+                    {% else %}
+                        <h6>Current Price: {{ watched.listing.starting_bid }}</h6>
+                    {% endif %}
                 </div>
                 <form action="{% url "watchlist_delete" %}" method="post">
                     {% csrf_token %}

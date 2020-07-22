@@ -11,10 +11,12 @@
                     <img src="{{ listing.image }}">
                 </div>
                 <div class="listing-info">
-                    <h4>{{ listing.title }}</h4>
+                    <h3>{{ listing.title }}</h3>
+                    <h5>Category: {{ listing.category }}</h5>
+                    <h5>Posted By {{ listing.user }} at {{ listing.date_posted }}</h5>
                     <p>{{ listing.description }}</p>
-                    {% if listing.bid__max %}
-                        <h6>Current Price: {{ listing.bid__max }}</h6>
+                    {% if listing.bids.all %}
+                        <h6>Current Price: {{ listing.bids.first.amount }}</h6>
                     {% else %}
                         <h6>Current Price: {{ listing.starting_bid }}</h6>
                     {% endif %}

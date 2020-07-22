@@ -77,10 +77,8 @@ def register(request):
 def create_listing(request):
     form = ListingForm()
     if request.method == "POST":
-        #form = ListingForm(request.POST)
         if request.user.is_authenticated:
             form = ListingForm(request.POST)
-            #form.user = request.user
             if form.is_valid():
                 instance = form.save(commit=False)
                 instance.user = request.user
@@ -122,9 +120,9 @@ def categories(request):
 
 def category(request, name):
     category = Category.objects.get(title=name)
-    listings = category.listings.annotate(
-        max_bid=Max('bids', filter=Q(is_active=True))
-    )
+    listings = Listing.objects.prefetch_related(
+        Prefetch("bids", queryset=Bid.objects.order_by("-amount").all())
+    ).select_related("user", "category").filter(category=category)
     return render(request, "auctions/category.html", {
         "category": category,
         "listings": listings
@@ -133,7 +131,10 @@ def category(request, name):
 
 def watchlist(request):
     user = request.user
-    listings = Watch.objects.select_related('listing').filter(user=user)
+    # get listings with their category and bid that are watched by user
+    listings = Watch.objects.select_related("listing", "listing__category").prefetch_related(
+        Prefetch("listing__bids", queryset=Bid.objects.order_by("-amount").all())
+    ).filter(user=user)
     return render(request, "auctions/watchlist.html", {
         "listings": listings
     })
@@ -145,7 +146,7 @@ def watchlist_add(request):
         title = request.POST["title"]
         listing = Listing.objects.get(title=title)
         user = request.user
-
+        # add to watchlist if not already in
         obj,created = Watch.objects.get_or_create(
             user=user,
             listing=listing
@@ -161,7 +162,6 @@ def watchlist_delete(request):
         title = request.POST["title"]
         listing = Listing.objects.get(title=title)
         user = request.user
-
         deleted = Watch.objects.get(user=user,listing=listing).delete()
         return HttpResponseRedirect(reverse("watchlist"))
     else:
