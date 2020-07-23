@@ -104,20 +104,14 @@ def listing(request, title):
             is_watched = False
         else:
             is_watched = True
-        return render(request, "auctions/listing.html", {
-            "listing": listing,
-            "bid": bid,
-            "watched": is_watched
-            "bid_form" : bid_form
-        })
     else:
         is_watched = False
-        return render(request, "auctions/listing.html", {
-            "listing": listing,
-            "bid": bid,
-            "watched": is_watched
-            "bid_form" : bid_form
-        })
+    return render(request, "auctions/listing.html", {
+        "listing": listing,
+        "bid": bid,
+        "watched": is_watched,
+        "bid_form" : bid_form
+    })
 
 
 def categories(request):
@@ -184,7 +178,7 @@ def bid(request):
         form = BidForm(request.POST)
         if request.user.is_authenticated:
             if form.is_valid():
-                listing = Listing.objects.filter("title"=title)
+                listing = Listing.objects.get(title=title)
                 instance = form.save(commit=False)
                 instance.user = request.user
                 instance.listing = listing

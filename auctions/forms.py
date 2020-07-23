@@ -1,4 +1,5 @@
 from django import forms
+from django.db.models import Max
 
 from .models import Category, Listing, Bid, Comment
 
@@ -37,14 +38,31 @@ class ListingForm(forms.ModelForm):
         }
 
 class BidForm(forms.ModelForm):
+    # add field "title" that is not in the model in order to validate amount
+    title = forms.CharField()
     class Meta:
         model = Bid
-        fields = {"amount"}
+        fields = ["amount", "title"]
         labels = {"amount": "Bid amount (to the nearest dollar)"}
-        widgets = {"amount": forms.NumberInput(attrs={"class": "form-control"}),}
+        widgets = {
+            "amount": forms.NumberInput(attrs={"class": "form-control"}),
+        }
         error_messages = {"amount": {
-            "required": "Please enter a valid bid",
+            "required": "Please enter a valid bid.",
         }}
+
+    def clean_amount(self):
+        amount = self.cleaned_data["amount"]
+        title = self.data["title"]
+        bids = Bid.objects.filter(listing__title=title)
+        highest_bid = bids.aggregate(Max("amount"))
+        if amount < highest_bid["amount__max"]:
+            raise forms.ValidationError("Bid must be more than current highest bid.")
+        return amount
+
+    #def __init__(self, *args, **kwargs):
+    #    self.title = kwargs.pop("title")
+    #    super(BidForm, self).__init__(*args, **kwargs)
 
 
 class CommentForm(forms.ModelForm):
