@@ -36,6 +36,16 @@ class ListingForm(forms.ModelForm):
             },
         }
 
+class BidForm(forms.ModelForm):
+    class Meta:
+        model = Bid
+        fields = {"amount"}
+        labels = {"amount": "Bid amount (to the nearest dollar)"}
+        widgets = {"amount": forms.NumberInput(attrs={"class": "form-control"}),}
+        error_messages = {"amount": {
+            "required": "Please enter a valid bid",
+        }}
+
 
 class CommentForm(forms.ModelForm):
     class Meta:

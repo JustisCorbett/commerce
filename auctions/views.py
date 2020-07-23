@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Max, Prefetch
 
 from .models import User, Category, Listing, Bid, Comment, Watch
-from .forms import ListingForm, CommentForm
+from .forms import ListingForm, BidForm, CommentForm
 
 
 def index(request):
@@ -92,6 +92,7 @@ def create_listing(request):
 
 def listing(request, title):
     # Get requested listing and it's user, category, and bids ordered by amount
+    bid_form = BidForm()
     listing = Listing.objects.prefetch_related(
         Prefetch("bids", queryset=Bid.objects.order_by("-amount").all())
     ).select_related("user", "category").get(title=title)
@@ -103,11 +104,19 @@ def listing(request, title):
             is_watched = False
         else:
             is_watched = True
-
         return render(request, "auctions/listing.html", {
             "listing": listing,
             "bid": bid,
             "watched": is_watched
+            "bid_form" : bid_form
+        })
+    else:
+        is_watched = False
+        return render(request, "auctions/listing.html", {
+            "listing": listing,
+            "bid": bid,
+            "watched": is_watched
+            "bid_form" : bid_form
         })
 
 
@@ -171,14 +180,14 @@ def watchlist_delete(request):
 @login_required(login_url='login')
 def bid(request):
     if request.method == "POST":
-        bid = request.POST["bid"]
         title = request.POST["title"]
-        listing = Listing.objects.get(title=title)
-        user = request.user
-
-        bid = Bid.objects.create(
-            amount=int(bid),
-            listing=listing,
-            user=user
-            )
+        form = BidForm(request.POST)
+        if request.user.is_authenticated:
+            if form.is_valid():
+                listing = Listing.objects.filter("title"=title)
+                instance = form.save(commit=False)
+                instance.user = request.user
+                instance.listing = listing
+                instance.save()
+        return HttpResponseRedirect(reverse("listing", kwargs={"title":title}))
         

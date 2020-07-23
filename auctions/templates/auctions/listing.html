@@ -19,12 +19,28 @@
                     <h6>Current Price: {{ listing.starting_bid }}</h6>
                 {% endif %}
             </div>
+            <div>
+                <form action="{% url "bid" %}" method="post">
+                    <div class="form-group">
+                        {{ form.amount.label_tag }}
+                        {{ form.amount }}
+                        {% if form.errors %}
+                            {% for error in form.amount.errors %}
+                                <div class="alert alert-danger">
+                                    <strong>{{ error|escape }}</strong>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <input type="hidden" name="title" value="{{ listing.title }}">
+                </form>
+                
             {% if watched %}
                 <form action="{% url "watchlist_delete" %}" method="post">
                     {% csrf_token %}
                     <input type="hidden" name="title" value="{{ listing.title }}">
-                <input class="btn btn-danger" type="submit" value="Remove from Watchlist">
-            </form>
+                    <input class="btn btn-danger" type="submit" value="Remove from Watchlist">
+                </form>
             {% else %}
                 <form action="{% url "watchlist_add" %}" method="post">
                     {% csrf_token %}
@@ -32,6 +48,7 @@
                     <input class="btn btn-success" type="submit" value="Add to Watchlist">
                 </form>
             {% endif %}
+            </div>
 
         </div>
     </div>
