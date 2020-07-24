@@ -20,9 +20,21 @@
                 {% endif %}
             </div>
             <div>
-                <form action="{% url "bid" %}" method="post">
+                <form action="{% url "listing" title=listing.title %}" method="post">
                     {% csrf_token %}
                     <div class="form-group">
+                        {% if bid_form.errors %}
+                            {% for error in bid_form.amount.errors %}
+                                <div class="alert alert-danger">
+                                    <strong>{{ error|escape }}</strong>
+                                </div>
+                            {% endfor %}
+                            {% for error in bid_form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    <strong>{{ error|escape }}</strong>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
                         {{ bid_form.amount.label_tag }}
                         <div class="input-group mb-3">
                             <div class="input-group-prepend">
@@ -32,18 +44,6 @@
                         </div>
                         <input class="btn btn-primary" type="submit" value="Place Bid">
                     </div>
-                    {% if bid_form.errors %}
-                        {% for error in bid_form.amount.errors %}
-                            <div class="alert alert-danger">
-                                <strong>{{ error|escape }}</strong>
-                            </div>
-                        {% endfor %}
-                        {% for error in bid_form.non_field_errors %}
-                            <div class="alert alert-danger">
-                                <strong>{{ error|escape }}</strong>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
                     <input type="hidden" name="title" value="{{ listing.title }}">
                 </form>
                 

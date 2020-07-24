@@ -91,8 +91,20 @@ def create_listing(request):
 
 
 def listing(request, title):
+    # check if validated form is in POST
+    if request.method == "POST":
+        if request.user.is_authenticated:
+            bid_form = BidForm(request.POST)
+            if bid_form.is_valid():
+                listing = Listing.objects.get(title=title)
+                instance = bid_form.save(commit=False)
+                instance.user = request.user
+                instance.listing = listing
+                instance.save()
+    else:
+        bid_form = BidForm()
+        
     # Get requested listing and it's user, category, and bids ordered by amount
-    bid_form = BidForm()
     listing = Listing.objects.prefetch_related(
         Prefetch("bids", queryset=Bid.objects.order_by("-amount").all())
     ).select_related("user", "category").get(title=title)
@@ -175,13 +187,15 @@ def watchlist_delete(request):
 def bid(request):
     if request.method == "POST":
         title = request.POST["title"]
-        form = BidForm(request.POST)
         if request.user.is_authenticated:
+            form = BidForm(request.POST)
             if form.is_valid():
                 listing = Listing.objects.get(title=title)
                 instance = form.save(commit=False)
                 instance.user = request.user
                 instance.listing = listing
                 instance.save()
+            else:
+                request.session["bid_form"] = form
         return HttpResponseRedirect(reverse("listing", kwargs={"title":title}))
         

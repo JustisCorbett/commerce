@@ -54,9 +54,14 @@ class BidForm(forms.ModelForm):
     def clean_amount(self):
         amount = self.cleaned_data["amount"]
         title = self.data["title"]
+        #Check if listing has bids. If it doesnt, use the listings starting_bid to validate
         bids = Bid.objects.filter(listing__title=title)
-        highest_bid = bids.aggregate(Max("amount"))
-        if amount < highest_bid["amount__max"]:
+        if not bids:
+            listing = Listing.objects.get(title=title)
+            highest_bid = listing.starting_bid
+        else:
+            highest_bid = bids.aggregate(Max("amount"))
+        if amount <= highest_bid["amount__max"]:
             raise forms.ValidationError("Bid must be more than current highest bid.")
         return amount
 
