@@ -73,7 +73,7 @@ def register(request):
         return render(request, "auctions/register.html")
 
 
-@login_required(login_url='login')
+@login_required(login_url="login")
 def create_listing(request):
     form = ListingForm()
     if request.method == "POST":
@@ -110,21 +110,33 @@ def listing(request, title):
     listing = Listing.objects.prefetch_related(
         Prefetch("bids", queryset=Bid.objects.order_by("-amount").all())
     ).select_related("user", "category").get(title=title)
-    # check if user is watching
+
     if request.user.is_authenticated:
+        # check if user is the creator
+        if request.user == listing.user:
+            is_creator = True
+        else:
+            is_creator = False
+        # check if user is watching
         try:
             watched = Watch.objects.get(listing=listing, user=request.user)
         except Watch.DoesNotExist:
             is_watched = False
         else:
             is_watched = True
+        # check if user has won the listing
+        if listing.is_active == False and listing.bids.all and listing.bids.first().user == request.user:
+            is_winner = True
+        else:
+            is_winner = False
     else:
         is_watched = False
     return render(request, "auctions/listing.html", {
         "listing": listing,
-        "bid": bid,
         "watched": is_watched,
-        "bid_form" : bid_form
+        "bid_form" : bid_form,
+        "is_creator": is_creator,
+        "is_winner": is_winner
     })
 
 
@@ -157,7 +169,7 @@ def watchlist(request):
     })
 
 
-@login_required(login_url='login')
+@login_required(login_url="login")
 def watchlist_add(request):
     if request.method == "POST":
         title = request.POST["title"]
@@ -173,7 +185,7 @@ def watchlist_add(request):
         HttpResponseRedirect(reverse("watchlist"))
 
 
-@login_required(login_url='login')
+@login_required(login_url="login")
 def watchlist_delete(request):
     if request.method == "POST":
         title = request.POST["title"]
@@ -185,19 +197,12 @@ def watchlist_delete(request):
         HttpResponseRedirect(reverse("watchlist"))
 
 
-@login_required(login_url='login')
-def bid(request):
+@login_required(login_url="login")
+def close_listing(request):
     if request.method == "POST":
         title = request.POST["title"]
-        if request.user.is_authenticated:
-            form = BidForm(request.POST)
-            if form.is_valid():
-                listing = Listing.objects.get(title=title)
-                instance = form.save(commit=False)
-                instance.user = request.user
-                instance.listing = listing
-                instance.save()
-            else:
-                request.session["bid_form"] = form
-        return HttpResponseRedirect(reverse("listing", kwargs={"title":title}))
+        listing = Listing.objects.get(title=title)
+        listing.is_active = False
+        listing.save()
+    return HttpResponseRedirect(reverse("listing", kwargs={"title":title}))
         
