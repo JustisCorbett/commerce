@@ -91,7 +91,7 @@ def create_listing(request):
 
 
 def listing(request, title):
-    # check if validated form is in POST
+    # check if validated form is in POST and attempt save
     if request.method == "POST":
         if request.user.is_authenticated:
             bid_form = BidForm(request.POST)
@@ -101,9 +101,11 @@ def listing(request, title):
                 instance.user = request.user
                 instance.listing = listing
                 instance.save()
+                # reset form for rendering if it saved
+                bid_form = BidForm()
     else:
         bid_form = BidForm()
-        
+
     # Get requested listing and it's user, category, and bids ordered by amount
     listing = Listing.objects.prefetch_related(
         Prefetch("bids", queryset=Bid.objects.order_by("-amount").all())
