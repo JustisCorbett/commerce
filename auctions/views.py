@@ -130,6 +130,7 @@ def listing(request, title):
         else:
             is_winner = False
     else:
+        is_creator = False
         is_watched = False
     return render(request, "auctions/listing.html", {
         "listing": listing,

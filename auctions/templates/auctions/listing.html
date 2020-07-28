@@ -8,7 +8,7 @@
             <div class="img-wrapper">
                 <img src="{{ listing.image }}">
             </div>
-            <div class="listing-info">
+            <div class="listing-info-wrapper">
                 {% if listing.is_active == False %}
                     <div class="alert alert-danger">
                         <strong>This auction has been closed by the creator.</strong>
@@ -30,7 +30,7 @@
                 {% endif %}
             </div>
             
-            <div>
+            <div class="listing-forms-wrapper">
                 {% if listing.is_active == True %}
                     <form action="{% url "listing" title=listing.title %}" method="post">
                         {% csrf_token %}
