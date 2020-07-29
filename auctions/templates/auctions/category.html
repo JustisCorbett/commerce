@@ -12,14 +12,13 @@
                 </div>
                 <div class="listing-info">
                     <h3>{{ listing.title }}</h3>
-                    <h5>Category: {{ listing.category }}</h5>
-                    <h5>Posted By {{ listing.user }} at {{ listing.date_posted }}</h5>
-                    <p>{{ listing.description }}</p>
                     {% if listing.bids.all %}
-                        <h6>Current Price: {{ listing.bids.first.amount }}</h6>
+                        <h5>Current Price: ${{ listing.bids.first.amount }}</h5>
                     {% else %}
-                        <h6>Current Price: {{ listing.starting_bid }}</h6>
+                        <h5>Current Price: ${{ listing.starting_bid }}</h5>
                     {% endif %}
+                    <h6>Posted by {{ listing.user }} {{ listing.date_posted|timesince }} ago.</h6>
+                    <p>{{ listing.description|truncatechars:400 }}</p>
                 </div>
             </div>
         </a>

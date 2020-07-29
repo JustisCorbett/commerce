@@ -12,14 +12,14 @@
                 </div>
                 <div class="listing-info">
                     <h3>{{ watched.listing.title }}</h3>
-                    <h5>Category: {{ watched.listing.category }}</h5>
-                    <h5>Posted By {{ watched.listing.user }} at {{ watched.listing.date_posted }}</h5>
-                    <p>{{ watched.listing.description }}</p>
-                    {% if watched.listing.bids.all %}
-                        <h6>Current Price: {{ watched.listing.bids.first.amount }}</h6>
+                    {% if listing.bids.all %}
+                        <h5>Current Price: ${{ listing.bids.first.amount }}</h5>
                     {% else %}
-                        <h6>Current Price: {{ watched.listing.starting_bid }}</h6>
+                        <h5>Current Price: ${{ listing.starting_bid }}</h5>
                     {% endif %}
+                    <h6>Category: {{ watched.listing.category }}</h6>
+                    <h6>Posted by {{ watched.listing.user }} {{ watched.listing.date_posted|timesince }} ago.</h6>
+                    <p>{{ watched.listing.description|truncatechars:400 }}</p>
                 </div>
                 <form action="{% url "watchlist_delete" %}" method="post">
                     {% csrf_token %}

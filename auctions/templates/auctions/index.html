@@ -8,21 +8,23 @@
         <a href="{% url "listing" title=listing.title %}">
             <div class="listing-wrapper">
                 <div class="img-wrapper">
-                    <img src="{{ listing.image }}">
+                    <img class="img" src="{{ listing.image }}">
                 </div>
                 <div class="listing-info-wrapper">
                     <h3>{{ listing.title }}</h3>
-                    <h5>Category: {{ listing.category }}</h5>
-                    <h5>Posted By {{ listing.user }} at {{ listing.date_posted }}</h5>
-                    <p>{{ listing.description }}</p>
+        </a>
                     {% if listing.bids.all %}
-                        <h6>Current Price: {{ listing.bids.first.amount }}</h6>
+                        <h5>Current Price: ${{ listing.bids.first.amount }}</h5>
                     {% else %}
-                        <h6>Current Price: {{ listing.starting_bid }}</h6>
+                        <h5>Current Price: ${{ listing.starting_bid }}</h5>
                     {% endif %}
+                    <h6>Category: {{ listing.category }}</h6>
+                    <h6>Posted by {{ listing.user }} {{ listing.date_posted|timesince }} ago</h6>
+                    <p>{{ listing.description|truncatechars:400 }}</p>
+                    
                 </div>
             </div>
-        </a>
+        
         {% endfor %}
     </div>
 {% endblock %}
