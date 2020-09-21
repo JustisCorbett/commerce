@@ -5,23 +5,22 @@
 
     <div class="list-wrapper">
         {% for listing in listings %}
-        <a href="{% url "listing" title=listing.title %}">
-            <div class="listing-wrapper">
-                <div class="img-wrapper">
-                    <img src="{{ listing.image }}">
-                </div>
-                <div class="listing-info">
-                    <h3>{{ listing.title }}</h3>
-                    {% if listing.bids.all %}
-                        <h5>Current Price: ${{ listing.bids.first.amount }}</h5>
-                    {% else %}
-                        <h5>Current Price: ${{ listing.starting_bid }}</h5>
-                    {% endif %}
-                    <h6>Posted by {{ listing.user }} {{ listing.date_posted|timesince }} ago.</h6>
-                    <p>{{ listing.description|truncatechars:400 }}</p>
-                </div>
+        <div class="listing-wrapper">
+            <div class="img-wrapper">
+                <img src="{{ listing.image }}">
             </div>
-        </a>
+            <div class="listing-info">
+                <a href="{% url "listing" title=listing.title %}"><h3>{{ listing.title }}</h3></a>
+                {% if listing.bids.all %}
+                    <h5>Current Price: ${{ listing.bids.first.amount }}</h5>
+                {% else %}
+                    <h5>Current Price: ${{ listing.starting_bid }}</h5>
+                {% endif %}
+                <h6>Posted by {{ listing.user }} {{ listing.date_posted|timesince }} ago.</h6>
+                <p>{{ listing.description|truncatechars:400 }}</p>
+            </div>
+        </div>
+        
         {% endfor %}
     </div>
 {% endblock %}

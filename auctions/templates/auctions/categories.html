@@ -5,7 +5,9 @@
 
     <div class="categories-wrapper">
         {% for category in categories %}
+        <div class="listing-wrapper">
         <a href="{% url "category" name=category.title %}">{{ category.title }}</a>
+        </div>
         {% endfor %}
     </div>
 {% endblock %}
