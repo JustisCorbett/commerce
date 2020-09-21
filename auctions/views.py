@@ -153,7 +153,7 @@ def category(request, name):
     category = Category.objects.get(title=name)
     listings = Listing.objects.prefetch_related(
         Prefetch("bids", queryset=Bid.objects.order_by("-amount").all())
-    ).select_related("user", "category").filter(category=category)
+    ).select_related("user", "category").filter(category=category, is_active=True)
     return render(request, "auctions/category.html", {
         "category": category,
         "listings": listings
