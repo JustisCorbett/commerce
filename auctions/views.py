@@ -106,10 +106,10 @@ def listing(request, title):
     else:
         bid_form = BidForm()
 
-    # Get requested listing and it's user, category, and bids ordered by amount
+    # Get requested listing and it's user, category, comments and bids ordered by amount
     listing = Listing.objects.prefetch_related(
         Prefetch("bids", queryset=Bid.objects.order_by("-amount").all())
-    ).select_related("user", "category").get(title=title)
+    ).select_related("user", "category", "comments").get(title=title)
 
     if request.user.is_authenticated:
         # check if user is the creator

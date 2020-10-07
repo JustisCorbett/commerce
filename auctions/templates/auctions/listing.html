@@ -83,4 +83,22 @@
         </div>
 
     </div>
+
+    <div class="comments-container">
+        {% if user.is_authenticated %}
+            <div class="create-comment">
+                <form action="{% url "create-comment" %}" method="post">
+                    <input type="text" name="comment">
+                    <input type="hidden" name="listing" value="{{ listing.id }}">
+                    <input class="btn btn-primary" type="submit" value="Comment">
+                </form>
+            </div>
+        {% endif %}
+        {% for comment in listing.comments %}
+            <div class="comment-container">
+                <h3>Commented by {{ comment.user }}</h3>
+                <p>{{ comment.text }}</p>
+            </div>
+        {% endfor %}
+    </div>
 {% endblock %}
