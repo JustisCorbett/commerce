@@ -65,12 +65,3 @@ class BidForm(forms.ModelForm):
             raise forms.ValidationError("Bid must be more than current highest bid.")
         return amount
 
-    #def __init__(self, *args, **kwargs):
-    #    self.title = kwargs.pop("title")
-    #    super(BidForm, self).__init__(*args, **kwargs)
-
-
-class CommentForm(forms.ModelForm):
-    class Meta:
-        model = Comment
-        fields = ["text"]

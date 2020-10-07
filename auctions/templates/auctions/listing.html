@@ -42,7 +42,7 @@
                                     <strong>{{ error|escape }}</strong>
                                 </div>
                             {% endfor %}
-                            {% for error in bid_form.non_field_errors %}
+                        {% for error in bid_form.non_field_errors %}
                                 <div class="alert alert-danger">
                                     <strong>{{ error|escape }}</strong>
                                 </div>
@@ -87,16 +87,20 @@
     <div class="comments-container">
         {% if user.is_authenticated %}
             <div class="create-comment">
-                <form action="{% url "create-comment" %}" method="post">
-                    <input type="text" name="comment">
-                    <input type="hidden" name="listing" value="{{ listing.id }}">
-                    <input class="btn btn-primary" type="submit" value="Comment">
+                <form action="{% url "create_comment" %}" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <textarea class="form-control" type="text" name="comment" placeholder="Type a comment here..."></textarea>
+                        <input type="hidden" name="listing" value="{{ listing.id }}">
+                        <input type="hidden" name="title" value="{{ listing.title }}">
+                    </div>
+                    <button class="btn btn-primary" type="submit">Comment</button>
                 </form>
             </div>
         {% endif %}
-        {% for comment in listing.comments %}
+        {% for comment in comments %}
             <div class="comment-container">
-                <h3>Commented by {{ comment.user }}</h3>
+                <h5>Commented by {{ comment.user }}</h5>
                 <p>{{ comment.text }}</p>
             </div>
         {% endfor %}

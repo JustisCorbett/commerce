@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Max, Prefetch
 
 from .models import User, Category, Listing, Bid, Comment, Watch
-from .forms import ListingForm, BidForm, CommentForm
+from .forms import ListingForm, BidForm
 
 
 def index(request):
@@ -93,12 +93,20 @@ def create_listing(request):
 @login_required(login_url="login")
 def create_comment(request):
     if request.method == "POST":
+        print("here")
         if request.user.is_authenticated:
-            form = CommentForm(request.POST)
-            if form.is_valid():
-                instance = form.save(commit=False)
-                instance.user = request.user
-                instance.save()
+            text = request.POST["comment"]
+            listing_id = request.POST["listing"]
+            listing = Listing.objects.get(id = listing_id)
+            user = request.user
+            comment = Comment(
+                user = user,
+                listing = listing,
+                text = text
+            )
+            comment.save()
+            title = request.POST["title"]
+            return HttpResponseRedirect(reverse("listing", kwargs={"title":title}))
                 
 
 
@@ -118,10 +126,13 @@ def listing(request, title):
     else:
         bid_form = BidForm()
 
-    # Get requested listing and it's user, category, comments and bids ordered by amount
+    # Get requested listing and it's user, category, and bids ordered by amount
     listing = Listing.objects.prefetch_related(
         Prefetch("bids", queryset=Bid.objects.order_by("-amount").all())
-    ).select_related("user", "category", "comments").get(title=title)
+    ).select_related("user", "category").get(title=title)
+
+    # Get comments for listing
+    comments = Comment.objects.filter(listing = listing)
 
     if request.user.is_authenticated:
         # check if user is the creator
@@ -147,6 +158,7 @@ def listing(request, title):
         is_watched = False
     return render(request, "auctions/listing.html", {
         "listing": listing,
+        "comments": comments,
         "watched": is_watched,
         "bid_form" : bid_form,
         "is_creator": is_creator,
