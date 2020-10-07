@@ -90,6 +90,18 @@ def create_listing(request):
     })
 
 
+@login_required(login_url="login")
+def create_comment(request):
+    if request.method == "POST":
+        if request.user.is_authenticated:
+            form = CommentForm(request.POST)
+            if form.is_valid():
+                instance = form.save(commit=False)
+                instance.user = request.user
+                instance.save()
+                
+
+
 def listing(request, title):
     # check if validated form is in POST and attempt save
     if request.method == "POST":
